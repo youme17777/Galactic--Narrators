@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Adventure with Sunny</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #0b0b2d, #1a1a4a, #0b0b2d);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Space background elements */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+        }
+        
+        .sun {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ffde00, #ff8c00, #ff4500);
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ff8c00, 0 0 80px #ff4500;
+            z-index: 1;
+            animation: pulse 3s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+        
+        /* Header styles */
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(10, 10, 40, 0.8);
+            border-bottom: 3px solid #ff8c00;
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #ffde00;
+            text-shadow: 0 0 10px #ff8c00;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #87ceeb;
+        }
+        
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: center;
+            background: rgba(20, 20, 60, 0.9);
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        nav button {
+            background: #4a4a9e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        nav button:hover {
+            background: #ff8c00;
+            transform: scale(1.05);
+        }
+        
+        nav button.active {
+            background: #ff4500;
+            box-shadow: 0 0 10px #ff8c00;
+        }
+        
+        /* Main content area */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Book section */
+        .book-section {
+            display: none;
+            background: rgba(30, 30, 70, 0.8);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+        }
+        
+        .book-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .chapter-title {
+            color: #ffde00;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 5px #ff8c00;
+        }
+        
+        .chapter-content {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            background: rgba(40, 40, 80, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .page-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .page-nav button {
+            background: #4a4a9e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .page-nav button:hover {
+            background: #ff8c00;
+        }
+        
+        .page-nav button:disabled {
+            background: #2a2a5a;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        /* Video section */
+        .video-section {
+            display: none;
+            text-align: center;
+        }
+        
+        .video-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.5);
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 450px;
+            background: #1a1a4a;
+        }
+        
+        .video-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffde00;
+            font-size: 1.5rem;
+            background: #1a1a4a;
+        }
+        
+        .episode-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .episode-btn {
+            background: #4a4a9e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .episode-btn:hover {
+            background: #ff8c00;
+        }
+        
+        .episode-btn.active {
+            background: #ff4500;
+            box-shadow: 0 0 10px #ff8c00;
+        }
+        
+        /* Quiz section */
+        .quiz-section {
+            display: none;
+            background: rgba(30, 30, 70, 0.8);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+        }
+        
+        .quiz-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .quiz-question {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #ffde00;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .quiz-option {
+            background: #4a4a9e;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: #5a5aae;
+        }
+        
+        .quiz-option.correct {
+            background: #2e8b57;
+        }
+        
+        .quiz-option.incorrect {
+            background: #dc143c;
+        }
+        
+        .quiz-result {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: #ffde00;
+        }
+        
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(10, 10, 40, 0.8);
+            border-top: 3px solid #ff8c00;
+            margin-top: 20px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .chapter-content {
+                font-size: 1rem;
+            }
+            
+            .video-player {
+                height: 300px;
+            }
+            
+            .episode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .episode-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Space background elements -->
+    <div class="stars" id="stars"></div>
+    <div class="sun"></div>
+    
+    <!-- Header -->
+    <header>
+        <h1>Space Adventure with Sunny</h1>
+        <p class="subtitle">Explore the amazing world of our Sun and space weather!</p>
+    </header>
+    
+    <!-- Navigation -->
+    <nav>
+        <button id="book-btn" class="active">Read the Book</button>
+        <button id="videos-btn">Watch Videos</button>
+        <button id="quiz-btn">Take the Quiz</button>
+    </nav>
+    
+    <!-- Main content container -->
+    <div class="container">
+        <!-- Book section -->
+        <section id="book-section" class="book-section active">
+            <h2 class="chapter-title" id="chapter-title">CHAPTER ONE: THE GREAT GLOW BEGINS</h2>
+            <div class="chapter-content" id="chapter-content">
+                <!-- Chapter content will be loaded here -->
+            </div>
+            <div class="page-nav">
+                <button id="prev-btn" disabled>Previous Chapter</button>
+                <button id="next-btn">Next Chapter</button>
+            </div>
+        </section>
+        
+        <!-- Videos section -->
+        <section id="videos-section" class="video-section">
+            <h2 class="chapter-title">Watch Episode Videos</h2>
+            <div class="video-container">
+                <div id="video-player" class="video-player">
+                    <div class="video-placeholder" id="video-placeholder">
+                        Select an episode to watch the video
+                    </div>
+                </div>
+            </div>
+            <div class="episode-selector" id="episode-selector">
+                <!-- Episode buttons will be generated here -->
+            </div>
+        </section>
+        
+        <!-- Quiz section -->
+        <section id="quiz-section" class="quiz-section">
+            <h2 class="chapter-title">Space Adventure Quiz</h2>
+            <div class="quiz-content">
+                <div class="quiz-question" id="quiz-question">
+                    <!-- Quiz question will be loaded here -->
+                </div>
+                <div class="quiz-options" id="quiz-options">
+                    <!-- Quiz options will be loaded here -->
+                </div>
+                <div class="quiz-result" id="quiz-result"></div>
+                <div class="quiz-nav">
+                    <button id="prev-question" disabled>Previous Question</button>
+                    <button id="next-question">Next Question</button>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <p>© 2023 Space Adventure with Sunny - An Educational Journey Through Our Solar System</p>
+    </footer>
+
+    <script>
+        // Create starry background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 200;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                
+                // Random size
+                const size = Math.random() * 3;
+                
+                // Random opacity
+                const opacity = Math.random() * 0.8 + 0.2;
+                
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.opacity = opacity;
+                
+                // Add twinkling animation
+                const duration = Math.random() * 5 + 3;
+                star.style.animation = `twinkle ${duration}s infinite alternate`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // Add CSS for twinkling animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes twinkle {
+                    0% { opacity: 0.2; }
+                    100% { opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Book data
+        const bookData = [
+            {
+                title: "CHAPTER ONE: THE GREAT GLOW BEGINS",
+                content: "A LONG TIME AGO, BEFORE SPACESHIPS OR COMPUTERS, THERE WAS A BRIGHT, SHINING STAR NAMED SUNNY. SUNNY WASN'T JUST ANY STAR; SHE WAS THE BIGGEST AND BRIGHTEST STAR IN A LARGE FAMILY CALLED THE SOLAR SYSTEM. EVERY DAY SUNNY WOULD WAKE UP AND STRETCH HER WARM, GOLDEN LIGHT ACROSS THE SKY."
+            },
+            {
+                title: "CHAPTER TWO: SUNNY AND SPINNING DANCERS",
+                content: "INSIDE SUNNY, A MAGICAL DANCE HAPPENED ALL THE TIME. THOUSANDS OF TINY ENERGY DANCERS TWIRLED AND SPUN IN LOOPS OF HEAT, LIGHT, AND POWERFUL MAGNETISM."
+            },
+            {
+                title: "CHAPTER THREE: THE DAY SUNNY SNEEZED",
+                content: "ONE DAY, SUNNY FELT A STRANGE TICKLE DEEP INSIDE. IT STARTED SMALL, BUT THEN IT GREW LARGER AND LARGER. 'UH OH,' SUNNY SAID. 'I THINK I'M GOING TO SNEEZE!'"
+            },
+            {
+                title: "CHAPTER FOUR: THE TRAVEL WITH BURPS",
+                content: "SUNNY DIDN'T JUST SNEEZE. SOMETIMES SHE LET OUT LONG, SOFT BURPS. THESE WERE GENTLE GUSTS OF PARTICLES CALLED THE SOLAR WIND. THEY BLEW STEADILY THROUGH SPACE, CARRYING TINY CHARGED PARTICLES THAT MADE PLANETS DANCE IN THEIR MAGNETIC FIELDS."
+            },
+            {
+                title: "CHAPTER FIVE: WATCHING SUNNY FROM AFAR",
+                content: "BECAUSE SUNNY'S DANCES, SNEEZES, AND BURPS COULD AFFECT SO MANY PEOPLE, SCIENTISTS BUILT A SPECIAL SPACE TEAM, THE NASA HELIOPHYSICS FLEET, TO WATCH SUNNY CLOSELY EVERY DAY."
+            },
+            {
+                title: "CHAPTER SIX: LIGHT SHOWS AND LASER BEAMS",
+                content: "ONE OF THE MOST AMAZING THINGS ABOUT SUNNY'S STORMS IS THE BEAUTIFUL LIGHT SHOW THEY CREATE ON EARTH. WHEN CHARGED PARTICLES FROM THE SUN HIT EARTH'S MAGNETIC SHIELD NEAR THE POLES, THEY GET PULLED DOWN INTO THE UPPER ATMOSPHERE."
+            },
+            {
+                title: "CHAPTER SEVEN: SUNNY GETS OLDER",
+                content: "SUNNY HAS BEEN SHINING FOR BILLIONS OF YEARS. THAT'S A LONG TIME TO IMAGINE! OVER THE YEARS, SUNNY'S ENERGY DANCERS HAVE STARTED TO SLOW DOWN. HER SNEEZES HAPPEN LESS OFTEN. AND HER BURPS ARE SOFTER AND GENTLER."
+            },
+            {
+                title: "CHAPTER EIGHT: THE BIG RED BALLOON",
+                content: "IN THE VERY FAR FUTURE MILLIONS OF YEARS FROM NOW, SUNNY WILL CHANGE DRAMATICALLY. SHE'LL GROW HUGE, PUFFING UP LIKE A GIANT RED BALLOON FILLING THE SKY. SCIENTISTS CALL THIS THE RED GIANT PHASE."
+            },
+            {
+                title: "CHAPTER NINE: WHITE DWARF DREAMS",
+                content: "AFTER THE RED GIANT STAGE, SUNNY WILL BECOME A TINY BUT BRIGHT STAR CALLED A WHITE DWARF. SHE'LL BE MUCH SMALLER, ABOUT THE SIZE OF EARTH, BUT INCREDIBLY DENSE AND GLOWING SOFTLY WITH THE ENERGY LEFT INSIDE HER."
+            }
+        ];
+        
+        // Video data - REPLACE THESE WITH YOUR ACTUAL VIDEO FILES
+       const videoData = [
+    { title: "The Great Glow Begins", type: "html5", url: "videos/ep1.mp4" },
+    { title: "Sunny and Spinning Dancers", type: "html5", url: "videos/ep2.mp4" },
+    { title: "The Day Sunny Sneezed", type: "html5", url: "videos/ep3.mp4" },
+    { title: "The Travel with Burps", type: "html5", url: "videos/ep4.mp4" },
+    { title: "Watching Sunny from Afar", type: "html5", url: "videos/ep5.mp4" },
+    { title: "Light Shows and Laser Beams", type: "html5", url: "videos/ep6.mp4" },
+    { title: "Sunny Gets Older", type: "html5", url: "videos/ep7.mp4" },
+    { title: "The Big Red Balloon", type: "html5", url: "videos/ep8.mp4" },
+    { title: "White Dwarf Dreams", type: "html5", url: "videos/ep9.mp4" }
+];
+
+        // Quiz data
+        const quizData = [
+            {
+                question: "What is the name of the bright, shining star in our story?",
+                options: ["Moonbeam", "Sunny", "Starlight", "Twinkle"],
+                correct: 1
+            },
+            {
+                question: "What are the tiny energy dancers inside Sunny?",
+                options: ["Solar flares", "Energy loops", "Magnetic fields", "All of the above"],
+                correct: 3
+            },
+            {
+                question: "What happens when Sunny sneezes?",
+                options: ["It rains on Earth", "She releases a solar flare", "She changes color", "She gets smaller"],
+                correct: 1
+            },
+            {
+                question: "What are the gentle gusts of particles called that Sunny releases?",
+                options: ["Solar wind", "Space breeze", "Stellar gusts", "Cosmic burps"],
+                correct: 0
+            },
+            {
+                question: "What beautiful light show is created when Sunny's particles hit Earth's atmosphere?",
+                options: ["Rainbows", "Auroras", "Lightning", "Meteor showers"],
+                correct: 1
+            },
+            {
+                question: "What will Sunny become in the very far future?",
+                options: ["A black hole", "A red giant", "A neutron star", "A supernova"],
+                correct: 1
+            },
+            {
+                question: "After the red giant stage, what will Sunny become?",
+                options: ["A white dwarf", "A brown dwarf", "A red dwarf", "A yellow dwarf"],
+                correct: 0
+            },
+            {
+                question: "How long does Sunny's solar cycle last?",
+                options: ["1 year", "5 years", "11 years", "100 years"],
+                correct: 2
+            },
+            {
+                question: "What protects Earth from the wildest parts of Sunny's dance party?",
+                options: ["The atmosphere", "The magnetosphere", "The ozone layer", "Clouds"],
+                correct: 1
+            }
+        ];
+        
+        // Current chapter and quiz question
+        let currentChapter = 0;
+        let currentQuestion = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        
+        // DOM elements
+        const bookSection = document.getElementById('book-section');
+        const videosSection = document.getElementById('videos-section');
+        const quizSection = document.getElementById('quiz-section');
+        
+        const bookBtn = document.getElementById('book-btn');
+        const videosBtn = document.getElementById('videos-btn');
+        const quizBtn = document.getElementById('quiz-btn');
+        
+        const chapterTitle = document.getElementById('chapter-title');
+        const chapterContent = document.getElementById('chapter-content');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        const videoPlayer = document.getElementById('video-player');
+        const episodeSelector = document.getElementById('episode-selector');
+        
+        const quizQuestion = document.getElementById('quiz-question');
+        const quizOptions = document.getElementById('quiz-options');
+        const quizResult = document.getElementById('quiz-result');
+        const prevQuestionBtn = document.getElementById('prev-question');
+        const nextQuestionBtn = document.getElementById('next-question');
+        
+        // Initialize the app
+        function init() {
+            createStars();
+            loadChapter(currentChapter);
+            createEpisodeButtons();
+            loadQuestion(currentQuestion);
+            
+            // Navigation event listeners
+            bookBtn.addEventListener('click', () => showSection('book'));
+            videosBtn.addEventListener('click', () => showSection('videos'));
+            quizBtn.addEventListener('click', () => showSection('quiz'));
+            
+            prevBtn.addEventListener('click', () => {
+                if (currentChapter > 0) {
+                    currentChapter--;
+                    loadChapter(currentChapter);
+                }
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                if (currentChapter < bookData.length - 1) {
+                    currentChapter++;
+                    loadChapter(currentChapter);
+                }
+            });
+            
+            prevQuestionBtn.addEventListener('click', () => {
+                if (currentQuestion > 0) {
+                    currentQuestion--;
+                    loadQuestion(currentQuestion);
+                }
+            });
+            
+            nextQuestionBtn.addEventListener('click', () => {
+                if (currentQuestion < quizData.length - 1) {
+                    currentQuestion++;
+                    loadQuestion(currentQuestion);
+                } else {
+                    showQuizResults();
+                }
+            });
+        }
+        
+        // Show selected section
+        function showSection(section) {
+            // Update active button
+            bookBtn.classList.remove('active');
+            videosBtn.classList.remove('active');
+            quizBtn.classList.remove('active');
+            
+            // Hide all sections
+            bookSection.classList.remove('active');
+            videosSection.classList.remove('active');
+            quizSection.classList.remove('active');
+            
+            // Show selected section
+            if (section === 'book') {
+                bookSection.classList.add('active');
+                bookBtn.classList.add('active');
+            } else if (section === 'videos') {
+                videosSection.classList.add('active');
+                videosBtn.classList.add('active');
+            } else if (section === 'quiz') {
+                quizSection.classList.add('active');
+                quizBtn.classList.add('active');
+            }
+        }
+        
+        // Load chapter content
+        function loadChapter(chapterIndex) {
+            const chapter = bookData[chapterIndex];
+            chapterTitle.textContent = chapter.title;
+            chapterContent.textContent = chapter.content;
+            
+            // Update navigation buttons
+            prevBtn.disabled = chapterIndex === 0;
+            nextBtn.disabled = chapterIndex === bookData.length - 1;
+        }
+        
+        // Load video
+        function loadVideo(episodeIndex) {
+            const video = videoData[episodeIndex];
+            
+            if (video.type === 'youtube') {
+                videoPlayer.innerHTML = `
+                    <iframe 
+                        width="100%" 
+                        height="450" 
+                        src="https://www.youtube.com/embed/${video.id}?rel=0" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                `;
+            } else if (video.type === 'html5') {
+                videoPlayer.innerHTML = `
+                    <video controls width="100%" height="100%">
+                        <source src="${video.url}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+            }
+        }
+        
+        // Create episode buttons
+        function createEpisodeButtons() {
+            for (let i = 0; i < bookData.length; i++) {
+                const button = document.createElement('button');
+                button.classList.add('episode-btn');
+                if (i === 0) {
+                    button.classList.add('active');
+                    loadVideo(0); // Load first video by default
+                }
+                button.textContent = `Episode ${i + 1}: ${bookData[i].title.split(':')[1].trim()}`;
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.episode-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    // Load the selected video
+                    loadVideo(i);
+                });
+                episodeSelector.appendChild(button);
+            }
+        }
+        
+        // Load quiz question
+        function loadQuestion(questionIndex) {
+            const question = quizData[questionIndex];
+            quizQuestion.textContent = question.question;
+            
+            // Clear previous options
+            quizOptions.innerHTML = '';
+            
+            // Create new options
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.classList.add('quiz-option');
+                
+                // If user has already answered this question, show the result
+                if (userAnswers[questionIndex] !== null) {
+                    if (index === question.correct) {
+                        button.classList.add('correct');
+                    } else if (index === userAnswers[questionIndex]) {
+                        button.classList.add('incorrect');
+                    }
+                }
+                
+                button.textContent = option;
+                button.addEventListener('click', () => {
+                    // Only allow answering if not already answered
+                    if (userAnswers[questionIndex] === null) {
+                        userAnswers[questionIndex] = index;
+                        
+                        // Show correct/incorrect
+                        if (index === question.correct) {
+                            button.classList.add('correct');
+                            quizResult.textContent = "Correct! Great job!";
+                            quizResult.style.color = "#90EE90";
+                        } else {
+                            button.classList.add('incorrect');
+                            // Also show the correct answer
+                            const correctOption = quizOptions.children[question.correct];
+                            correctOption.classList.add('correct');
+                            quizResult.textContent = "Not quite. Try again!";
+                            quizResult.style.color = "#FF7F7F";
+                        }
+                        
+                        // Update navigation
+                        updateQuizNavigation();
+                    }
+                });
+                quizOptions.appendChild(button);
+            });
+            
+            // Clear result
+            quizResult.textContent = '';
+            
+            // Update navigation
+            updateQuizNavigation();
+        }
+        
+        // Update quiz navigation buttons
+        function updateQuizNavigation() {
+            prevQuestionBtn.disabled = currentQuestion === 0;
+            nextQuestionBtn.disabled = currentQuestion === quizData.length - 1;
+            
+            // Change next button text on last question
+            if (currentQuestion === quizData.length - 1) {
+                nextQuestionBtn.textContent = "See Results";
+            } else {
+                nextQuestionBtn.textContent = "Next Question";
+            }
+        }
+        
+        // Show quiz results
+        function showQuizResults() {
+            const correctCount = userAnswers.filter((answer, index) => 
+                answer === quizData[index].correct).length;
+            const totalQuestions = quizData.length;
+            const percentage = Math.round((correctCount / totalQuestions) * 100);
+            
+            quizQuestion.textContent = "Quiz Complete!";
+            quizOptions.innerHTML = '';
+            quizResult.innerHTML = `
+                <h3>Your Score: ${correctCount}/${totalQuestions} (${percentage}%)</h3>
+                <p>${getResultMessage(percentage)}</p>
+                <button id="restart-quiz" style="margin-top: 20px; padding: 10px 20px; background: #ff8c00; color: white; border: none; border-radius: 10px; cursor: pointer;">
+                    Take Quiz Again
+                </button>
+            `;
+            
+            document.getElementById('restart-quiz').addEventListener('click', () => {
+                currentQuestion = 0;
+                userAnswers = new Array(quizData.length).fill(null);
+                loadQuestion(currentQuestion);
+                prevQuestionBtn.style.display = 'block';
+                nextQuestionBtn.style.display = 'block';
+            });
+            
+            prevQuestionBtn.style.display = 'none';
+            nextQuestionBtn.style.display = 'none';
+        }
+        
+        // Get result message based on score
+        function getResultMessage(percentage) {
+            if (percentage >= 90) {
+                return "Outstanding! You're a space weather expert!";
+            } else if (percentage >= 70) {
+                return "Great job! You know a lot about Sunny and space weather!";
+            } else if (percentage >= 50) {
+                return "Good effort! Keep learning about our amazing Sun!";
+            } else {
+                return "Nice try! Review the book and videos to learn more!";
+            }
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
